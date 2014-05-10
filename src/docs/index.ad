@@ -1,0 +1,126 @@
+= GPars actors workshop 
+By Mario Garcia <link:https://www.twitter.com/marioggar[@marioggar]>
+
+== Intro 
+
+This workshop objective is to learn how to create actors using GPars.
+
+=== What is GPars ?
+
+[,GPars site]
+""
+The GPars framework offers Java developers intuitive and safe ways to handle Java 
+or Groovy tasks concurrently. Leveraging the enormous flexibility of the 
+Groovy programing language and building on proven Java technologies, 
+we aim to make concurrent programming for multi-core hardware intuitive, 
+robust and enjoyable.
+""
+
+=== What an actor is ?
+
+There are two common ways of synchronization among threads, one is the dark and full
+of terrors synchronization way, and the second one is message passing. The latter
+is the one actor model embraces.
+
+[,Wikipedia]
+""
+The actor model in computer science is a mathematical model of concurrent 
+computation that treats "actors" as the universal primitives of concurrent 
+digital computation: in response to a message that it receives, an actor 
+can make local decisions, create more actors, send more messages, and determine 
+how to respond to the next message received
+""
+An actor provides isolated mutability and ensures that:
+
+* At most one thread processes the actor's body
+* Actor's state can be safely modified by code in the body without any extra effor
+
+To make sure those conditions will remain true the programmer *should be sure that actor's code is never 
+invoked directly from outside* the actors body.
+
+=== What an actor does ?
+
+An actor has three main related actions:
+
+* Receiving messages
+* Sending messages
+* Sending replies
+* Creating new actors
+
+=== When to use actors ?
+
+Whenever you need to access a given resource from multiple threads.
+
+=== Why not using threads ?
+
+Well, historically *synchronizing threads* has not been the best skill of Java programmers so
+far, so to speak. Actor model eases very much the way concurrent access could be 
+cordinated.
+
+*Scalability* is the other main reason. While the JVM has a certain thread limit, any actor model implementation
+normally has a pool of threads. If an actor is not doing anythin, it doesn't consume threads.
+
+TIP: Normally there is no good reason to do low level concurrent programming. It's been always error prone and
+it requires a really good understanding not only about JDK's concurrency api but the Java memory model as well.
+
+== Before Getting Started 
+
+What do we need to do this workshop ?
+
+* Java^tm^ 1.7+
+* Groovy 2.1.x
+* Gradle 1.9+
+* Git
+
+== Receiving messages 
+
+Actors are all about passing messages so the first thing we are going to do is to pass messages
+to an actor.
+
+For this first example we are using the GroovyConsole. So open it up and create your first actor
+
+=== Our first actor 
+
+[source, groovy]
+----
+// <1>
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+DefaultActor receiver = Actors.actor { // <2>
+    loop { // <3>
+        react { String msg -> // <4>
+            println "Hey thanks for telling me $msg"
+        }        
+    }    
+}
+
+// <5>
+receiver.send 'Message 1'  
+receiver << 'Message 2'    
+receiver 'Message 3'       
+
+----
+
+So few lines of code and many concepts already. Let's review all of them.
+
+<1> To work with actors in GPars you should import *_groovy.gpars.actor_* package.
+<2> Actor's dsl is created by using *_Actors.actor_* method.
+<3> This actor never will end without an explicit termination 
+<4> When *reacting* for a given received message, the type could be established as parameter to the react closure
+<5> You can pass messages to an actor by using the actor's *send* method. This method can be invoked in the
+three ways exposed in the example.
+
+=== Type of actors 
+
+GPars distinguises between *stateful* actors and *stateless* actors. 
+
+We've just built a *_groovyx.gpars.actor.DefaultActor_*. A _DefaultActor_ belongs to the group of stateful actors. Stateful actors
+allow programmer to handle implicit state directly. 
+
+Inside stateless actors GPars has *_DynamicDispatchActor_* and *_ReactiveActor_* classes.
+
+TIP: Depending on your requirements you can choose one or another, but it is clear stateless 
+actors will perform better than the stateful ones.
+
+
