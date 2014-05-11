@@ -1,0 +1,62 @@
+== Intro 
+
+This workshop objective is to learn how to create actors using GPars.
+
+=== What is GPars ?
+
+[,GPars site]
+""
+The GPars framework offers Java developers intuitive and safe ways to handle Java 
+or Groovy tasks concurrently. Leveraging the enormous flexibility of the 
+Groovy programing language and building on proven Java technologies, 
+we aim to make concurrent programming for multi-core hardware intuitive, 
+robust and enjoyable.
+""
+
+=== What an actor is ?
+
+There are two common ways of synchronization among threads, one is the dark and full
+of terrors synchronization way, and the second one is message passing. The latter
+is the one actor model embraces.
+
+[,Wikipedia]
+""
+The actor model in computer science is a mathematical model of concurrent 
+computation that treats "actors" as the universal primitives of concurrent 
+digital computation: in response to a message that it receives, an actor 
+can make local decisions, create more actors, send more messages, and determine 
+how to respond to the next message received
+""
+An actor provides isolated mutability and ensures that:
+
+* At most one thread processes the actor's body
+* Actor's state can be safely modified by code in the body without any extra effor
+
+To make sure those conditions will remain true the programmer *should be sure that actor's code is never 
+invoked directly from outside* the actors body.
+
+=== What an actor does ?
+
+An actor has three main related actions:
+
+* Receiving messages
+* Sending messages
+* Sending replies
+* Creating new actors
+
+=== When to use actors ?
+
+Whenever you need to access a given resource from multiple threads.
+
+=== Why not using threads ?
+
+Well, historically *synchronizing threads* has not been the best skill of Java programmers so
+far, so to speak. Actor model eases very much the way concurrent access could be 
+cordinated.
+
+*Scalability* is the other main reason. While the JVM has a certain thread limit, any actor model implementation
+normally has a pool of threads. If an actor is not doing anythin, it doesn't consume threads.
+
+TIP: Normally there is no good reason to do low level concurrent programming. It's been always error prone and
+it requires a really good understanding not only about JDK's concurrency api but the Java memory model as well.
+
