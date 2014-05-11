@@ -1,0 +1,152 @@
+== Sending messages 
+
+Actors are all about passing messages so the first thing we are going to do is to send messages
+to an actor.
+
+For this first example we are using the GroovyConsole. So open it up and create your first actor
+
+=== Our first actor 
+
+[source, groovy]
+----
+// <1>
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+DefaultActor receiver = Actors.actor { // <2>
+    loop { // <3>
+        react { String msg -> // <4>
+            println "Hey thanks for telling me $msg"
+        }        
+    }    
+}
+
+// <5>
+receiver.send 'Message 1'  
+receiver << 'Message 2'    
+receiver 'Message 3'       
+
+----
+
+So few lines of code and many concepts already. Let's review all of them.
+
+<1> To work with actors in GPars you should import *_groovy.gpars.actor_* package.
+<2> Actor's dsl is created by using *_Actors.actor_* method.
+<3> This actor never will end without an explicit termination 
+<4> When *reacting* for a given received message, the type could be established as parameter to the react closure
+<5> You can pass messages to an actor by using the actor's *send* method. This method can be invoked in the
+three ways exposed in the example.
+
+=== Type of actors 
+
+GPars distinguises between *stateful* actors and *stateless* actors. 
+
+We've just built a *_groovyx.gpars.actor.DefaultActor_*. A _DefaultActor_ belongs to the group of stateful actors. Stateful actors
+allow programmer to handle implicit state directly. 
+
+Inside stateless actors GPars has *_DynamicDispatchActor_* and *_ReactiveActor_* classes.
+
+TIP: Depending on your requirements you can choose one or another, but it is clear stateless 
+actors will perform better than the stateful ones.
+
+=== Send and forget
+
+In real applications sometimes we just want to send some data without blocking the application and forget about the
+result of the data sent. A typical scenario would be logging user behavior through the application right ?
+
+[source, groovy]
+.Send and forget DSL
+----
+import groovy.transform.Immutable
+
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+@Immutable // <1>
+class UserItem {
+    String userName 
+    Long itemId
+}
+
+final DefaultActor loggingServiceActor = Actors.actor { 
+    loop {
+        react { UserItem userItem -> // <2>
+            println "user ${userItem.userName} added item ${userItem.itemId} at ${new Date()}"
+        }
+    }
+}
+
+// <3>
+loggingServiceActor.send(new UserItem(userName:'Mario', itemId: 10L))
+Thread.sleep(1000) // Adding a delay to see it working
+loggingServiceActor << ([userName: 'Rober', itemId: 20L] as UserItem)
+----
+
+Here we'are sending a message to the actor from an outer process holding the actor's reference. 
+
+<1> Immutability is always the right choice when dealing with concurrency and parallelism. Use it always.
+<2> The react method closure can receive as parameter any type. Of course make sure the type you expect is the one
+your are actually receiving, otherwise you'll get a cast exception.
+<3> Here is not another actor sending messages to our actor but a different thread (the main thread).
+
+WARNING: An actor's message handler (react) can only expect 0 or 1 argument
+
+Before starting the exercise, take a look how it would look like without the DSL. That will be really important when
+going through the exercises.
+
+[source,groovy]
+.Send and forget No-DSL
+----
+import groovy.transform.Immutable
+
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+@Immutable
+class UserItem {
+    String userName 
+    Long itemId
+}
+
+class LoggingActorService extends DefaultActor { // <1>
+    void act() { // <2>
+        loop {
+            react { UserItem userItem -> 
+                println """
+                    user ${userItem.userName} added item ${userItem.itemId} 
+                    at ${new Date()}
+                """
+            }
+        }
+    }
+}
+
+class UserService {
+    def loggingService <3>
+
+    void trackAddedItem(final UserItem userItem) {
+        loggingService << userItem
+    }
+}
+
+def loggingService = new LoggingActorService()
+def userService = new UserService(loggingService: loggingService)
+
+loggingService.start() // <4>
+
+userService.trackAddedItem(new UserItem(userName: 'John', itemId: 43L))
+Thread.sleep(1000)
+userService.trackAddedItem(new UserItem(userName: 'Ronnie', itemId: 23L))
+
+----
+
+<1> Now we are explicitly declaring a DefaultActor class
+<2> Now the actor's body is constraint within the body of the act() method.
+<3> In order to be able to send messages to the actor we need its reference, so we pass it when building our service instance
+<4> Before sending messages to our actor, the actor should be already listening otherwise you will get an exception
+
+=== Exercise
+
+Create an actor receiving 4 numbers an prints all of them to the console. You can use the GroovyConsole to do that. Please
+try to do it using GPars DSL and plain classes. 
+

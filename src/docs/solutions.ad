@@ -1,0 +1,41 @@
+[appendix]
+:numbered!:
+== Exercises solutions
+=== Solution 4.2
+
+[source, groovy]
+.Solution DSL
+----
+import static groovyx.gpars.actor.Actors.actor
+
+def printer = actor {
+    loop {
+        react { List<Integer> numbers -> 
+           println numbers.sum() 
+        }     
+    }    
+}
+
+printer << (1..4) as List
+
+----
+
+[source, groovy]
+.Solution NO-DSL
+----
+import groovyx.gpars.actor.DefaultActor
+
+class Printer extends DefaultActor {
+    void act() {
+        loop {
+            react { numbers ->
+                println numbers.sum() 
+            }     
+        }     
+    }    
+}
+
+def printer = new Printer()
+printer.start()
+printer << (1..4)
+----

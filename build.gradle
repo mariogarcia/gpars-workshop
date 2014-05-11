@@ -32,9 +32,9 @@ asciidoctor {
     sourceDir = 'src/docs' as File
     options = [
         attributes: [
-        'icons': 'font',
-        'source-highlighter': 'prettify',
-            toc: 'left'
+            'icons': 'font',
+            'source-highlighter': 'prettify',
+            'toc': 'left'
         ]
     ]
 
