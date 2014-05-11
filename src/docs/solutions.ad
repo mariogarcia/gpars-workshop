@@ -1,7 +1,7 @@
 [appendix]
 :numbered!:
 == Exercises solutions
-=== Solution 4.2
+=== Solution 3.4
 
 [source, groovy]
 .Solution DSL

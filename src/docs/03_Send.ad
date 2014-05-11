@@ -150,3 +150,91 @@ userService.trackAddedItem(new UserItem(userName: 'Ronnie', itemId: 23L))
 Create an actor receiving 4 numbers an prints all of them to the console. You can use the GroovyConsole to do that. Please
 try to do it using GPars DSL and plain classes. 
 
+=== Send And Block
+
+Logging is really important but sometimes we just want a response as a consequence of sending data. Now we will
+be sending a message to a given actor and expecting a response to that data.
+
+Let's say we want to have some word translated we want to send the word to an actor instance and get the translation
+back.
+
+[source, groovy]
+.SendAndWait - Reply
+----
+import static groovyx.gpars.actor.Actors.actor
+
+final def english2SpanishService = actor {
+    loop {
+        react { String word ->
+            if (word == 'hello') {
+                reply 'hola' // <1>
+            } else if (word == 'goodbye') {
+                reply 'adios'     
+            } else {
+                reply 'no idea :P'     
+            }
+        }     
+    }    
+}
+
+String helloTranslation = english2SpanishService.sendAndWait('hello') // <2>
+String goodbyeTranslation = english2SpanishService.sendAndWait('goodbye')
+String seeyoulaterTranslation = english2SpanishService.sendAndWait('see you later')
+
+assert helloTranslation == 'hola'
+assert goodbyeTranslation == 'adios'
+assert seeyoulaterTranslation == 'no idea :P'
+
+----
+
+<1> The actor can only use the *_reply_* method from a non-actor-request when the client uses
+sendAndWait for sending the message
+<2> The *_sendAndWait_* method blocks the current thread until a response has been received
+
+[source, groovy]
+.SendAndPromise- Reply
+----
+import static groovyx.gpars.actors.Actors.actor
+import groovyx.gpars.dataflow.Promise
+
+def reallySlowService = actor {
+    loop {
+        react {
+            Thread.sleep(2000)     
+            reply 43
+        }     
+    }    
+}
+
+def reallyFastService = actor {
+    loop {
+        react {
+            reply 'No idea'
+        }     
+    }    
+}
+
+Promise answer1 = 
+    reallySlowService.
+        sendAndPromise('Tell me the meaning of life the universe and everything')
+String answer2 = 
+    reallyFastService.
+        sendAndWait('Tellme how is gonna end 24 this season')
+
+assert answer1 == 43
+assert answer2 == 'No idea'
+----
+
+=== Exercise
+
+Now that we now how to send and receive a simple response from a given actor, lets modify the 
+actor you built for the first exercise for instead of printing out the result, make it send back
+the result to you.
+
+You have to send three different list of numbers, get back the results and sum them in the client
+once you have received the partial results from the actor.
+
+The objective of this exercises is using promises or blocking calls to get results from a given actor.
+
+
+
