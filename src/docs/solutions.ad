@@ -39,3 +39,54 @@ def printer = new Printer()
 printer.start()
 printer << (1..4)
 ----
+
+=== Solution 3.6
+
+[source, groovy]
+.Solution DSL
+----
+import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.dataflow.Promise
+
+def printer = actor {
+    loop {
+        react { List<Integer> numbers -> 
+           reply numbers.sum() 
+        }     
+    }    
+}
+
+Promise first = printer.sendAndPromise((1..4))
+Integer second = printer.sendAndWait((4..8))
+Integer third = printer.sendAndWait((8..12))
+
+assert (first.get() + second + third) == 90
+----
+
+[source, groovy]
+.Solution NO-DSL
+----
+import groovyx.gpars.actor.DefaultActor
+import groovyx.gpars.dataflow.Promise
+
+class Printer extends DefaultActor {
+    void act() {
+        loop {
+            react { numbers ->
+                reply numbers.sum() 
+            }     
+        }     
+    }    
+}
+
+def printer = new Printer()
+printer.start()
+
+Promise first = printer.sendAndPromise((1..4))
+Integer second = printer.sendAndWait((4..8))
+Integer third = printer.sendAndWait((8..12))
+
+assert (first.get() + second + third) == 90
+
+
+----

@@ -1,0 +1,9 @@
+== Receiving Messages
+
+So far we have focused our efforts on how can we send a message to a given actor. Well in this chapter
+we'll be seeing from the other side, we will be focusing on topics such as:
+
+* How an actor receive messages ?
+* How can an actor respond to a given message ?
+* What type of objects can an actor receive ?
+* Is an actor capable of behave differently depending on the object received ? 
