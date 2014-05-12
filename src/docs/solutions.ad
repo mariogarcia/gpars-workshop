@@ -39,3 +39,129 @@ def printer = new Printer()
 printer.start()
 printer << (1..4)
 ----
+
+=== Solution 3.6
+
+[source, groovy]
+.Solution DSL
+----
+import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.dataflow.Promise
+
+def printer = actor {
+    loop {
+        react { List<Integer> numbers -> 
+           reply numbers.sum() 
+        }     
+    }    
+}
+
+Promise first = printer.sendAndPromise((1..4))
+Integer second = printer.sendAndWait((4..8))
+Integer third = printer.sendAndWait((8..12))
+
+assert (first.get() + second + third) == 90
+----
+
+[source, groovy]
+.Solution NO-DSL
+----
+import groovyx.gpars.actor.DefaultActor
+import groovyx.gpars.dataflow.Promise
+
+class Printer extends DefaultActor {
+    void act() {
+        loop {
+            react { numbers ->
+                reply numbers.sum() 
+            }     
+        }     
+    }    
+}
+
+def printer = new Printer()
+printer.start()
+
+Promise first = printer.sendAndPromise((1..4))
+Integer second = printer.sendAndWait((4..8))
+Integer third = printer.sendAndWait((8..12))
+
+assert (first.get() + second + third) == 90
+
+
+----
+
+=== Solution 4.3
+
+[source, groovy]
+.Solution DSL
+----
+
+import static groovyx.gpars.actor.Actors.messageHandler
+import static java.security.MessageDigest.getInstance
+
+import groovyx.gpars.actor.DynamicDispatchActor
+import groovyx.gpars.dataflow.Promise
+
+class Order { String content }
+class NationalOrder extends Order {}
+class InternationalOrder extends Order {}
+
+final Closure<String> md5 = { String st ->
+    return getInstance("MD5").digest(st.getBytes("UTF-8")).encodeHex().toString()
+}
+
+final DynamicDispatchActor orderProcessor = messageHandler {
+    when { InternationalOrder international ->
+        reply md5(international.content)
+    }    
+    when { NationalOrder national ->
+        println "I'm sure the order: ${national.content} will be delivered"    
+    }
+}
+
+Promise md5IdPromise = 
+    orderProcessor.sendAndPromise(new InternationalOrder(content: 'supersecret'))
+
+orderProcessor << new NationalOrder(content: 'something really silly')
+orderProcessor << new NationalOrder(content: 'something as silly as the previous one')
+
+println "I need to hold the id: ${md5IdPromise.get()}"
+----
+
+[source, groovy]
+.Solution NO-DSL
+----
+import static groovyx.gpars.actor.Actors.messageHandler
+import static java.security.MessageDigest.getInstance
+
+import groovyx.gpars.actor.DynamicDispatchActor
+import groovyx.gpars.dataflow.Promise
+
+class Order { String content }
+class NationalOrder extends Order {}
+class InternationalOrder extends Order {}
+
+class OrderProcessor extends DynamicDispatchActor {
+    String md5(String st) {
+        return getInstance("MD5").digest(st.getBytes("UTF-8")).encodeHex().toString()
+    }
+    void onMessage(InternationalOrder international) {
+        reply md5(international.content)
+    }    
+    void onMessage(NationalOrder national) {
+        println "I'm sure the order: ${national.content} will be delivered"    
+    }
+}
+
+final OrderProcessor orderProcessor = new OrderProcessor().start()
+final Promise md5IdPromise = 
+    orderProcessor.sendAndPromise(new InternationalOrder(content: 'supersecret'))
+
+orderProcessor << new NationalOrder(content: 'something really silly')
+orderProcessor << new NationalOrder(content: 'something as silly as the previous one')
+
+println "I need to hold the id: ${md5IdPromise.get()}"
+
+----
+

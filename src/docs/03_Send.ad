@@ -1,4 +1,4 @@
-== Sending messages 
+== Sending
 
 Actors are all about passing messages so the first thing we are going to do is to send messages
 to an actor.

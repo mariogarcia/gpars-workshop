@@ -1,0 +1,113 @@
+== Receiving
+
+So far we have focused our efforts on how can we send a message to a given actor. Well in this chapter
+we'll be seeing from the other side, we will be focusing on topics such as:
+
+* How an actor receive messages ?
+* How can an actor respond to a given message ?
+* What type of objects can an actor receive ?
+* Is an actor capable of behave differently depending on the object received ? 
+
+=== A specific type of messages 
+
+So far we've seen how to send one specific type of messages to our actors.
+
+[source, groovy]
+.Receiving one specific type
+----
+import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.actor.DefaultActor
+
+final DefaultActor echoActor = actor {
+    loop {
+        react { String message ->
+            reply "Nice to hear: $message"
+        }        
+    }    
+}
+
+String response = echoActor.sendAndWait('Hi there')
+
+assert response == "Nice to hear: Hi there"
+
+----
+
+
+WARNING: If you try to send a message with another value not expected in the actor's closure, it will throw an exception
+
+=== Different types of messages 
+
+That's cool, but sometimes you may want to send different types of messages to a given object
+and you may expect the actor to behave differently depending on the type received.
+
+That kind of behavior is acomplished by *_DynamicDispatchActor_*. Whether you use the DSL or the
+Java flavor you will be able to create different processing for different type of messages using
+the same actor.
+
+[source, groovy]
+.Dispatching DSL 
+----
+import static groovyx.gpars.actor.Actors.messageHandler
+import groovyx.gpars.actor.DynamicDispatchActor
+
+DynamicDispatchActor handler = messageHandler {
+    when { String name ->
+       println "Nice to meet you $name" 
+    }
+    when { Integer age ->
+        println "You look younger than $age"    
+    }
+}
+
+handler << "Mario"
+handler << 37
+
+----
+
+[source, groovy]
+.Dispatching NO-DSL
+----
+import groovyx.gpars.actor.DynamicDispatchActor
+
+class Handler extends DynamicDispatchActor {
+    void onMessage(String name) {
+        println "Nice to meet you $name"    
+    }
+
+    void onMessage(Integer age) {
+        println "You look younger than $age"     
+    }
+    
+}
+
+final Handler handler = new Handler()
+handler.start()
+
+handler << "Mario"
+handler << 37
+
+----
+
+
+WARNING: If you send a value of a type not expected by any of the 'when' clauses, it will throw an exception.
+
+=== Exercise
+
+You have to create an actor that processes national and international orders. All orders have
+a field call 'content' where they carry the message.
+
+For national orders no reply is needed because all national orders are supposed to reach destination. But for international orders you need
+the actor to reply with a MD5 signature of the message (I'll give you the code to get the MD5).
+
+[source,groovy]
+.Getting MD5 for a given String
+----
+import static java.security.MessageDigest.getInstance
+
+String md5(String st) {
+    return getInstance("MD5").digest(st.getBytes("UTF-8")).encodeHex().toString()
+}
+
+----
+
+

@@ -27,10 +27,10 @@ digital computation: in response to a message that it receives, an actor
 can make local decisions, create more actors, send more messages, and determine 
 how to respond to the next message received
 ""
-An actor provides isolated mutability and ensures that:
+An actor provides *_isolated mutability_* and ensures that:
 
-* At most one thread processes the actor's body
-* Actor's state can be safely modified by code in the body without any extra effor
+* *At most one thread* processes the actor's body
+* *Actor's state can be safely modified by code in the body* without any extra effort
 
 To make sure those conditions will remain true the programmer *should be sure that actor's code is never 
 invoked directly from outside* the actors body.

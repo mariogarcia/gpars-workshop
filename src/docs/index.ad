@@ -6,5 +6,6 @@ include::src/docs/01_Intro.ad[]
 
 include::src/docs/02_Starting.ad[]
 include::src/docs/03_Send.ad[]
+include::src/docs/04_ReceivingMessages.ad[]
 
 include::src/docs/solutions.ad[]
