@@ -7,3 +7,80 @@ we'll be seeing from the other side, we will be focusing on topics such as:
 * How can an actor respond to a given message ?
 * What type of objects can an actor receive ?
 * Is an actor capable of behave differently depending on the object received ? 
+
+=== Receiving a specific type of messages 
+
+So far we've seen how to send one specific type of messages to our actors.
+
+[source, groovy]
+.Receiving one specific type
+----
+import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.actor.DefaultActor
+
+final DefaultActor echoActor = actor {
+    loop {
+        react { String message ->
+            reply "Nice to hear: $message"
+        }        
+    }    
+}
+
+String response = echoActor.sendAndWait('Hi there')
+
+assert response == "Nice to hear: Hi there"
+
+----
+
+=== Receiving different types of messages 
+
+That's cool, but sometimes you may want to send different types of messages to a given object
+and you may expect the actor to behave differently depending on the type received.
+
+That kind of behavior is acomplished by *_DynamicDispatchActor_*. Whether you use the DSL or the
+Java flavor you will be able to create different processing for different type of messages using
+the same actor.
+
+[source, groovy]
+.Dispatching DSL 
+----
+import static groovyx.gpars.actor.Actors.messageHandler
+import groovyx.gpars.actor.DynamicDispatchActor
+
+DynamicDispatchActor handler = messageHandler {
+    when { String name ->
+       println "Nice to meet you $name" 
+    }
+    when { Integer age ->
+        println "You look younger than $age"    
+    }
+}
+
+handler << "Mario"
+handler << 37
+
+----
+
+[source, groovy]
+.Dispatching NO-DSL
+----
+import groovyx.gpars.actor.DynamicDispatchActor
+
+class Handler extends DynamicDispatchActor {
+    void onMessage(String name) {
+        println "Nice to meet you $name"    
+    }
+
+    void onMessage(Integer age) {
+        println "You look younger than $age"     
+    }
+    
+}
+
+final Handler handler = new Handler()
+handler.start()
+
+handler << "Mario"
+handler << 37
+
+----
