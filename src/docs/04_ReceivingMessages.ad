@@ -1,4 +1,4 @@
-== Receiving Messages
+== Receiving
 
 So far we have focused our efforts on how can we send a message to a given actor. Well in this chapter
 we'll be seeing from the other side, we will be focusing on topics such as:
@@ -8,7 +8,7 @@ we'll be seeing from the other side, we will be focusing on topics such as:
 * What type of objects can an actor receive ?
 * Is an actor capable of behave differently depending on the object received ? 
 
-=== Receiving a specific type of messages 
+=== A specific type of messages 
 
 So far we've seen how to send one specific type of messages to our actors.
 
@@ -32,7 +32,10 @@ assert response == "Nice to hear: Hi there"
 
 ----
 
-=== Receiving different types of messages 
+
+WARNING: If you try to send a message with another value not expected in the actor's closure, it will throw an exception
+
+=== Different types of messages 
 
 That's cool, but sometimes you may want to send different types of messages to a given object
 and you may expect the actor to behave differently depending on the type received.
@@ -84,3 +87,27 @@ handler << "Mario"
 handler << 37
 
 ----
+
+
+WARNING: If you send a value of a type not expected by any of the 'when' clauses, it will throw an exception.
+
+=== Exercise
+
+You have to create an actor that processes national and international orders. All orders have
+a field call 'content' where they carry the message.
+
+For national orders no reply is needed because all national orders are supposed to reach destination. But for international orders you need
+the actor to reply with a MD5 signature of the message (I'll give you the code to get the MD5).
+
+[source,groovy]
+.Getting MD5 for a given String
+----
+import static java.security.MessageDigest.getInstance
+
+String md5(String st) {
+    return getInstance("MD5").digest(st.getBytes("UTF-8")).encodeHex().toString()
+}
+
+----
+
+
