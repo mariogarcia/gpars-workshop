@@ -30,7 +30,7 @@ receiver 'Message 3'
 
 So few lines of code and many concepts already. Let's review all of them.
 
-<1> To work with actors in GPars you should import *_groovy.gpars.actor_* package.
+<1> To work with actors in GPars you should import *_groovyx.gpars.actor_* package.
 <2> Actor's dsl is created by using *_Actors.actor_* method.
 <3> This actor never will end without an explicit termination 
 <4> When *reacting* for a given received message, the type could be established as parameter to the react closure
@@ -84,7 +84,7 @@ loggingServiceActor << ([userName: 'Rober', itemId: 20L] as UserItem)
 
 Here we'are sending a message to the actor from an outer process holding the actor's reference. 
 
-<1> Immutability is always the right choice when dealing with concurrency and parallelism. Use it always.
+<1> Immutability is always the right choice when dealing with concurrency and parallelism. Use it as much as you can.
 <2> The react method closure can receive as parameter any type. Of course make sure the type you expect is the one
 your are actually receiving, otherwise you'll get a cast exception.
 <3> Here is not another actor sending messages to our actor but a different thread (the main thread).
