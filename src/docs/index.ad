@@ -8,5 +8,6 @@ include::src/docs/02_Starting.ad[]
 include::src/docs/03_Send.ad[]
 include::src/docs/04_ReceivingMessages.ad[]
 include::src/docs/05_MakeThemTalk.ad[]
+include::src/docs/06_Shit_happens.ad[]
 
 include::src/docs/solutions.ad[]

@@ -1,0 +1,62 @@
+== Shit happens
+
+If something may go wrong it will go wrong. It's a universal rule isn't it ?
+
+=== Actor throws an exception
+
+What happens if an actor throws an exception ? Should we try-catch the possible exception and deal with it ? Well the general
+recomendation about this is "let-it-fail". If we don't add try-catch code in our actors, they will remain cleaner and will
+be easier to maintain.
+
+One of the lifecycle methods of all actors is *_onException(Exception)_*. This method is a nice place to put the code we want
+to execute when somethin wrong happened in an actor. That way we keep logic code from guard code.
+
+[source, groovy]
+.Handling an actor exception DSL
+----
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+DefaultActor buggyActor = Actors.actor {
+    delegate.metaClass.onException = { 
+        println "Close database connection"
+        println "Release other resources"
+        println "Bye"
+    }
+    loop {
+        react { String message ->
+            throw new Exception("Shit happens :P")
+        }    
+    }
+}
+
+buggyActor << "Something nice" 
+
+----
+
+[source, groovy]
+.Handling an actor exception NO-DSL
+----
+import groovyx.gpars.actor.Actors
+import groovyx.gpars.actor.DefaultActor
+
+class BuggyActor extends DefaultActor {
+
+    void onException(Throwable th) {
+        println "Close database connection"
+        println "Release other resources"
+        println "Bye"
+    }
+
+    void act() {
+        loop {
+            react { String message ->
+                throw new Exception("Shit happens :P")
+            }    
+        }    
+    }
+}
+
+new BuggyActor().start() << "Something nice" 
+
+----
