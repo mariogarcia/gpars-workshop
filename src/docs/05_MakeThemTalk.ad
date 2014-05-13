@@ -1,4 +1,4 @@
-== Make Actors talk!
+== Make Actors socialize
 
 So far we have been sending messages to an actor, receiving messages as an actor, and even replying as an actor but there's one important part
 missing here... I want actors to talk to each other. Lets see how to do it.
@@ -111,4 +111,39 @@ println bank.sendAndWait(3000)
 
 ----
 
+=== Exercise
+
+Your boss need you to do some optimization on some files of the corporate site.
+
+* All text files should be timestamped
+* All images should be resized to a certain dimension
+
+You have to create
+
+* 1 Dispatching actor, so every time a file is received you must
+send it to the correspondent actor to be processed.
+* 1 Text processing actor
+* 1 Image processing actor
+
+Every time you send the path of a file the dispatching actor should forwad that
+file to the correspondent processing actor.
+
+TIP: Although not necessary you can use the Java7 WatchService to look for changes
+in a given directory instead of keeping informed your actors.
+
+NODE: Follow up I leave a snippet to resize an image with the library https://github.com/thebuzzmedia/imgscalr[imgscalr]
+
+[source, groovy]
+----
+@Grab('org.imgscalr:imgscalr-lib:4.2')
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
+
+import org.imgscalr.Scalr
+
+BufferedImage src = ImageIO.read(new File('//source'))
+BufferedImage img = Scalr.resize(src, 300, 200)
+
+ImageIO.write(img, 'jpg', new File('//destination'))
+----
 
