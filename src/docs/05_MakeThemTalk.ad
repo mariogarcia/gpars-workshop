@@ -1,0 +1,70 @@
+== Make Actors talk!
+
+So far we have been sending messages to an actor, receiving messages as an actor, and even replying as an actor but there's one important part
+missing here... I want actors to talk to each other. Lets see how to do it.
+
+=== Joining actors
+
+If actors behavior depends on each other, we better make sure no one ends before it should. That's why we use the join method.
+
+[,GPars official documentation]
+""
+Actors provide a join() method to allow callers to wait for the actor to terminate. A variant accepting a timeout is also available
+""
+
+[source,groovy]
+.Joining DSL
+----
+import static groovyx.gpars.actor.Actors.actor
+
+final receiver = actor {
+    react { msg ->
+        reply "Replying actor received: '$msg'"
+    } 
+}
+
+final sender = actor {
+    receiver << "Sent Ping" 
+    react { msg ->
+        println msg
+    }
+}
+
+[receiver, sender]*.join()
+
+----
+
+[source,groovy]
+.Joining NO-DSL
+----
+import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.actor.DefaultActor
+
+class SendingActor extends DefaultActor {
+    final DefaultActor destination
+    SendingActor(DefaultActor destination) {
+       this.destination = destination 
+    }
+    void act() {
+        println destination.sendAndWait("Sent Ping")    
+    }
+}
+
+class ReplyingActor extends DefaultActor {
+    void act() {
+        react { String msg ->
+            reply "ReplyingActor received: $msg'"     
+        }    
+    } 
+}
+
+final receiver = new ReplyingActor().start()
+final sender = new SendingActor(receiver).start()
+
+[receiver, sender]*.join()
+
+----
+
+=== Forwarding
+
+Suppose you have like an actor acting as a proxy and then it forwards the message to the final actor destination depending on some information.
