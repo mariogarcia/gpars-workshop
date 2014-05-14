@@ -18,9 +18,11 @@ Actors provide a join() method to allow callers to wait for the actor to termina
 import static groovyx.gpars.actor.Actors.actor
 
 final receiver = actor {
-    react { msg ->
-        reply "Replying actor received: '$msg'"
-    } 
+    loop {
+        react { msg ->
+            reply "Replying actor received: '$msg'"
+        }   
+    }
 }
 
 final sender = actor {
@@ -31,7 +33,7 @@ final sender = actor {
 }
 
 [receiver, sender]*.join()
-
+println "Never reached"
 ----
 
 [source,groovy]
@@ -52,9 +54,11 @@ class SendingActor extends DefaultActor {
 
 class ReplyingActor extends DefaultActor {
     void act() {
-        react { String msg ->
-            reply "ReplyingActor received: $msg'"     
-        }    
+        loop {
+            react { String msg ->
+                reply "ReplyingActor received: $msg'"     
+            }   
+        }
     } 
 }
 
@@ -62,6 +66,7 @@ final receiver = new ReplyingActor().start()
 final sender = new SendingActor(receiver).start()
 
 [receiver, sender]*.join()
+println "Never reached"
 
 ----
 
@@ -106,8 +111,6 @@ bank.send(1000, branch1)
 bank.send(2000, branch2)
 
 println bank.sendAndWait(3000)
-
-[bank, branch1, branch2].join()
 
 ----
 
