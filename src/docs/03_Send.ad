@@ -194,7 +194,7 @@ sendAndWait for sending the message
 [source, groovy]
 .SendAndPromise- Reply
 ----
-import static groovyx.gpars.actors.Actors.actor
+import static groovyx.gpars.actor.Actors.actor
 import groovyx.gpars.dataflow.Promise
 
 def reallySlowService = actor {
