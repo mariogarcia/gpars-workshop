@@ -4,9 +4,29 @@ If something may go wrong it will go wrong. It's a universal rule isn't it ?
 
 === Actor throws an exception
 
-What happens if an actor throws an exception ? Should we try-catch the possible exception and deal with it ? Well the general
-recomendation about this is "let-it-fail". If we don't add try-catch code in our actors, they will remain cleaner and will
+What happens if an actor throws an exception ? Should we try-catch the possible exception and deal with it ? Well, general
+recomendation about this is *_let-it-crash_*. If we don't add try-catch code in our actors, they will remain cleaner and will
 be easier to maintain.
+
+During the lifecycle of our actor there are some pointcuts to handle undesirable situations such as exceptions,
+interruptions, or timeouts.
+
+[source, groovy]
+----
+
+/* called when the actor's thread gets interrupted. Thread interruption will result 
+ * in the stopping the actor in any case  */
+onInterrupt(InterruptedException ie) 
+
+/* called when no messages are sent to the actor within the timeout specified for 
+ * the currently blocking react method */
+onTimeout()
+
+/* called when an exception occurs in the actor's event handler. 
+ * Actor will stop after return from this method. */
+onException(Throwable th)
+
+----
 
 One of the lifecycle methods of all actors is *_onException(Exception)_*. This method is a nice place to put the code we want
 to execute when somethin wrong happened in an actor. That way we keep logic code from guard code.
@@ -60,3 +80,7 @@ class BuggyActor extends DefaultActor {
 new BuggyActor().start() << "Something nice" 
 
 ----
+
+Well it's nice we have a mecanism to make the actor stop nicely... but I don't want the actor to stop receiving messages... I want
+it to continue... how do I do that ?
+
