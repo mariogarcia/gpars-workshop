@@ -5,7 +5,8 @@ missing here... I want actors to talk to each other. Lets see how to do it.
 
 === Joining actors
 
-If actors behavior depends on each other, we better make sure no one ends before it should. That's why we use the join method.
+When you want callers to wait an actor to terminate you should be using actor's *_join()_* method. Sometimes maybe
+a client calling to an actor, sometimes could be an actor sending messages to another actor.
 
 [,GPars official documentation]
 ""
