@@ -165,3 +165,60 @@ println "I need to hold the id: ${md5IdPromise.get()}"
 
 ----
 
+=== Solution 5.3
+
+[source, groovy]
+.DSL
+----
+@Grab('org.imgscalr:imgscalr-lib:4.2')
+import static javax.imageio.ImageIO.read
+import static javax.imageio.ImageIO.write
+import static org.imgscalr.Scalr.resize
+import static groovyx.gpars.actor.Actors.actor
+import static java.io.File.createTempFile
+
+import groovyx.gpars.actor.DefaultActor
+
+final DefaultActor imageActor = actor {
+    loop {
+        react { File image ->
+            def src = read(image)
+            def img = resize(src, 400, 300)
+            
+            write(img, 'jpg', createTempFile('actors_', image.name))
+            
+            println "IMAGE: ${image.name} processed"
+        }
+    }
+}
+
+final DefaultActor textActor = actor {
+    loop {
+        react { File textFile ->
+            RandomAccessFile f = new RandomAccessFile(textFile, 'rw')
+            f.seek(0)
+            f.write('Author: Me'.getBytes())
+            f.close()    
+            println "TEXT: ${textFile.name} processed"
+        }
+    }
+
+}
+
+final DefaultActor dispatchingActor = actor {
+    loop { 
+        react { File file ->
+            if (file.name.endsWith('jpg')) {
+                imageActor << file
+            } else if (file.name.endsWith('txt')) {
+                textActor << file
+            } else {
+                println "Sorry dont know how to handle '${file.name}'"
+            }
+        }
+    }
+}
+
+new File('/home/mario/Pictures/').
+    listFiles().each { dispatchingActor << it }
+----
