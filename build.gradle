@@ -22,7 +22,10 @@ repositories {
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.1.0'
+    compile 'org.codehaus.gpars:gpars:1.2.0'
     compile 'org.slf4j:slf4j-api:1.7.5'
+    compile 'org.imgscalr:imgscalr-lib:4.2'
+
     testCompile 'junit:junit:4.11'
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
