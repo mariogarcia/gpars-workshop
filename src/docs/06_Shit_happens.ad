@@ -4,12 +4,14 @@ If something may go wrong it will go wrong. It's a universal rule isn't it ?
 
 === Actor throws an exception
 
-What happens if an actor throws an exception ? Should we try-catch the possible exception and deal with it ? Well, general
+An actor terminates automatically when an exception that is not handled inside actor's body is thrown.
+
+Then... What happens if an actor throws an exception ? Should we try-catch the possible exception and deal with it ? Well, general
 recomendation about this is *_let-it-crash_*. If we don't add try-catch code in our actors, they will remain cleaner and will
 be easier to maintain.
 
-During the lifecycle of our actor there are some pointcuts to handle undesirable situations such as exceptions,
-interruptions, or timeouts.
+During the lifecycle of our actor there are some callback methods useful to use when undesirable situations such as exceptions,
+interruptions, or timeouts happen.
 
 [source, groovy]
 ----
@@ -28,8 +30,13 @@ onException(Throwable th)
 
 ----
 
-One of the lifecycle methods of all actors is *_onException(Exception)_*. This method is a nice place to put the code we want
-to execute when somethin wrong happened in an actor. That way we keep logic code from guard code.
+If the worst scenario happens we would like at least to terminate the actor in an ordered and controlled way.
+
+In order to to that all actors have the *_onException(Exception)_* method. This method is a nice place to put the code we want
+to execute when a not handled exception is thrown inside the actor. That way we keep logic code away from guard code.
+
+WARNING: Remember: By default an actor stops when an exception has been thrown
+within the body of the actor. 
 
 [source, groovy]
 .Handling an actor exception DSL
@@ -84,3 +91,6 @@ new BuggyActor().start() << "Something nice"
 Well it's nice we have a mecanism to make the actor stop nicely... but I don't want the actor to stop receiving messages... I want
 it to continue... how do I do that ?
 
+=== Supervisors
+
+(TODO)
