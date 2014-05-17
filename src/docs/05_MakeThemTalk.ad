@@ -117,25 +117,32 @@ println bank.sendAndWait(3000)
 
 === Exercise
 
-Your boss need you to do some optimization on some files of the corporate site.
+You can forward messages if you know the destination but most of the time you just deliver
+messages to a proxy which then, forwards the message to the proper destination.
 
-* All text files should be timestamped
-* All images should be resized to a certain dimension
+In this exercise your boss need you to do some optimization on some 
+files of the corporate site.
+
+* All text files should include his name
+* All images should be resized to a certain dimension (ie 300x300)
 
 You have to create
 
-* 1 Dispatching actor, so every time a file is received you must
+* 1 actor acting as a proxy, so every time a file is received you must
 send it to the correspondent actor to be processed.
 * 1 Text processing actor
 * 1 Image processing actor
 
-Every time you send the path of a file the dispatching actor should forwad that
-file to the correspondent processing actor.
+Every time you send a file to the proxy actor it should forward that
+file to the correspondent processing actor (text files to text actor and
+images to image actor).
+
+TIP: You can solve this exercise just with *_DefaultActor_* instances
 
 TIP: Although not necessary you can use the Java7 WatchService to look for changes
-in a given directory instead of keeping informed your actors.
+in a given directory instead of sending files manually to your actors.
 
-NODE: Follow up I leave a snippet to resize an image with the library https://github.com/thebuzzmedia/imgscalr[imgscalr]
+NOTE: Follow up I leave a snippet to resize an image with the library https://github.com/thebuzzmedia/imgscalr[imgscalr]
 
 [source, groovy]
 ----

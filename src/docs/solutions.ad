@@ -195,10 +195,12 @@ final DefaultActor imageActor = actor {
 final DefaultActor textActor = actor {
     loop {
         react { File textFile ->
-            RandomAccessFile f = new RandomAccessFile(textFile, 'rw')
-            f.seek(0)
-            f.write('Author: Me'.getBytes())
-            f.close()    
+            def dst = createTempFile('actors_', textFile.name)
+    
+            // Don't do this at home :P
+            dst << "Author: MYBOSS"
+            dst << textFile.text
+
             println "TEXT: ${textFile.name} processed"
         }
     }
@@ -212,13 +214,32 @@ final DefaultActor dispatchingActor = actor {
                 imageActor << file
             } else if (file.name.endsWith('txt')) {
                 textActor << file
-            } else {
-                println "Sorry dont know how to handle '${file.name}'"
-            }
+            } 
         }
     }
 }
 
-new File('/home/mario/Pictures/').
+new File('/somedirwithfiles/').
     listFiles().each { dispatchingActor << it }
 ----
+
+Because the NO-DSL version has its own Spock Specification it has been organized in several classes.
+
+[source, groovy]
+.Actor acting as a Proxy (NO-DSL)
+----
+include::{sourceDir}/exercises/forwarding/images/FileProcessorActor.groovy[]
+----
+
+[source, groovy]
+.Actor processing images (NO-DSL)
+----
+include::{sourceDir}/exercises/forwarding/images/ImageProcessorActor.groovy[]
+----
+
+[source, groovy]
+.Actor processing images (NO-DSL)
+----
+include::{sourceDir}/exercises/forwarding/images/TextProcessorActor.groovy[]
+----
+
