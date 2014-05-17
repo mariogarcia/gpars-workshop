@@ -238,8 +238,17 @@ include::{sourceDir}/exercises/forwarding/images/ImageProcessorActor.groovy[]
 ----
 
 [source, groovy]
-.Actor processing images (NO-DSL)
+.Actor processing text files (NO-DSL)
 ----
 include::{sourceDir}/exercises/forwarding/images/TextProcessorActor.groovy[]
 ----
+
+[source, groovy]
+.Specification (NO-DSL)
+----
+include::{testDir}/exercises/forwarding/images/ImagesProcessingSpecification.groovy[]
+----
+
+I've used the *_NotificationActor_* and *_NotifiedActor_* to make tests wait until everything 
+has been processed.
 
