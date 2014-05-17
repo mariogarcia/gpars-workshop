@@ -1,9 +1,15 @@
 package exercises.forwarding.images
 
 import static java.io.File.createTempFile
+
+import exercises.test.NotificationActor
 import groovyx.gpars.actor.DefaultActor
 
-class TextProcessorActor extends DefaultActor {
+class TextProcessorActor extends NotificationActor {
+
+    TextProcessorActor(DefaultActor monitor) {
+        super(monitor)
+    }
 
     void act() {
         loop {
@@ -14,7 +20,7 @@ class TextProcessorActor extends DefaultActor {
                 newFile << 'Author: me'
                 newFile << textFile.text
 
-                println "Text ${newFile.name} processed"
+                notifyIfMonitor(textFile.name)
             }
         }
     }
