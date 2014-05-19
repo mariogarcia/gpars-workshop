@@ -1,4 +1,4 @@
-= GPars actors workshop 
+= GPars Actors 
 :numbered:
 :testDir: ../../src/test/groovy
 :sourceDir: ../../src/main/groovy
@@ -12,5 +12,6 @@ include::src/docs/03_Send.ad[]
 include::src/docs/04_ReceivingMessages.ad[]
 include::src/docs/05_MakeThemTalk.ad[]
 include::src/docs/06_Shit_happens.ad[]
+include::src/docs/07_Stateless.ad[]
 
 include::src/docs/solutions.ad[]

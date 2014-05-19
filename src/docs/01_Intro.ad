@@ -27,6 +27,7 @@ digital computation: in response to a message that it receives, an actor
 can make local decisions, create more actors, send more messages, and determine 
 how to respond to the next message received
 ""
+
 An actor provides *_isolated mutability_* and ensures that:
 
 * *At most one thread* processes the actor's body
@@ -54,9 +55,20 @@ Well, historically *synchronizing threads* has not been the best skill of Java p
 far, so to speak. Actor model eases very much the way concurrent access could be 
 cordinated.
 
+TIP: Normally there is no good reason to do low level concurrent programming. It's been always error prone and
+it requires a really good understanding not only about JDK's concurrency api but the Java memory model as well.
+
 *Scalability* is the other main reason. While the JVM has a certain thread limit, any actor model implementation
 normally has a pool of threads. If an actor is not doing anythin, it doesn't consume threads.
 
-TIP: Normally there is no good reason to do low level concurrent programming. It's been always error prone and
-it requires a really good understanding not only about JDK's concurrency api but the Java memory model as well.
+[,GPars documentation]
+""
+Actors share a pool of threads, which are dynamically assigned to actors when the actors need to react to 
+messages sent to them. The threads are returned back to the pool once a message has been processed and the 
+actor is idle waiting for some more messages to arrive. Actors become detached from the underlying threads 
+and so a relatively small thread pool can serve potentially unlimited number of actors. 
+Virtually unlimited scalability in number of actors is the main advantage of event-based actors , 
+which are detached from the underlying physical threads
+""
+
 
