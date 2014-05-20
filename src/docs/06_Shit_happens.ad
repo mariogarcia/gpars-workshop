@@ -211,7 +211,8 @@ has chosen to create another Supervised instance to keep processing messages the
 Enough to say, the more stateless is the Supervised actor the less difficult will be to 'restart' the Supervised actor again
 
 NOTE: *_What "restart" means ?_* In this example, and in general, in other JVM's implementations, to restart and actor is eventually creating a new instance 
-of the same type of the stopped actor. 
+of the same type of the stopped actor. That's why it's so important to keep your actor instances stateless. If you had some state you should be serializing
+the state of the actor in order to recreate the state later on.
 
 ==== OneToAll Strategy
 
