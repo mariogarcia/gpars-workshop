@@ -2,7 +2,7 @@ package exercises.supervising;
 
 import java.util.List;
 import java.util.ArrayList;
-import groovyx.gpars.actor.DynamicDispatchActor;
+import groovyx.gpars.actor.DefaultActor;
 
 public class SupervisorBus extends DefaultActor {
 
@@ -14,7 +14,7 @@ public class SupervisorBus extends DefaultActor {
         }
     }
 
-    public void onMessage(Supervisor supervisor) {
+    public void onMessage(SupervisorActor supervisor) {
         this.supervisors.add(supervisor);
     }
 

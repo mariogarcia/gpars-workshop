@@ -7,7 +7,7 @@ import groovyx.gpars.actor.DefaultActor;
 public abstract class SupervisorActor extends DefaultActor {
 
     private final List<Class<? extends Actor>> supervisedTypeList;
-    private final SupervisorBus supervisorBus;
+    private SupervisorBus supervisorBus;
 
     public SupervisorActor (
         final List<Class<? extends Actor>> supervisedTypeList) {
