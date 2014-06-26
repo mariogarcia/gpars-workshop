@@ -37,7 +37,8 @@ asciidoctor {
         attributes: [
             'icons': 'font',
             'source-highlighter': 'prettify',
-            'toc': 'left'
+            'toc': 'left',
+            'toclevels': 10
         ]
     ]
 
