@@ -422,6 +422,13 @@ span.icon > [class^="icon-"], span.icon > [class*=" icon-"] { cursor: default; }
 </ul>
 </li>
 <li><a href="#_stateless_actors">7. Stateless Actors</a></li>
+<li><a href="#_remoting">8. Remoting</a></li>
+<li>
+<ul class="sectlevel2">
+<li><a href="#_dataflow">8.1. Dataflow</a></li>
+<li><a href="#_actors">8.2. Actors</a></li>
+</ul>
+</li>
 <li><a href="#_exercises_solutions">Appendix A: Exercises solutions</a></li>
 <li>
 <ul class="sectlevel2">
@@ -1626,6 +1633,260 @@ the state of the actor in order to recreate the state later on.
 </div>
 </div>
 <div class="sect1">
+<h2 id="_remoting">8. Remoting</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Remoting has become part of GPars since version 1.3-SNAPSHOT. That&#8217;s great news!!!! Until
+this moment all actors should run in the same JVM in order to be able to
+communicate each other. Now you can be running an actor in one machine sending
+messages to another in another machine.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Although in the confluence documentation says it should be
+available through the snapshot binaries the fact is that at the point
+I wrote this examples, I had to create my own binaries from sources
+because it wasn&#8217;t included in the jar. I&#8217;m sure that in the
+following weeks this warning won&#8217;t make sense anymore.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can find more information about remoting at GPars ascii documentation, and
+at this codehaus page <a href="http://docs.codehaus.org/display/GPARS/2014/09/06/Remoting+for+GPars">Confluence</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_dataflow">8.1. Dataflow</h3>
+<div class="paragraph">
+<p>Although this documentation is all about actors, I&#8217;ve added some extra
+examples about remoting because I think remoting is going to be one
+of the most important features of GPars in the near future.</p>
+</div>
+<div class="paragraph">
+<p>When working with remote dataflows the most
+important classes to keep in mind are:</p>
+</div>
+<div class="listingblock">
+<div class="title">imports</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>import groovyx.gpars.dataflow.DataflowVariable
+import groovyx.gpars.dataflow.remote.RemoteDataflows</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following example just runs a server instance which publish a dataflow
+variable and a client asking for the value of the dataflow variable
+published at the server.</p>
+</div>
+<div class="paragraph">
+<p>First of all lets see how to build the server:</p>
+</div>
+<div class="listingblock">
+<div class="title">Server</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>    RemoteDataflows startServer() {
+        def dataflows = RemoteDataflows.create() <i class="conum" data-value="1"></i><b>(1)</b>
+        dataflows.startServer('localhost',9000) <i class="conum" data-value="2"></i><b>(2)</b>
+        def variable = new DataflowVariable() <i class="conum" data-value="3"></i><b>(3)</b>
+        variable &lt;&lt; 42
+        dataflows.publish(variable,"meaning-of-life") <i class="conum" data-value="4"></i><b>(4)</b>
+
+        return dataflows
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of a <code>RemoteDataflows</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Stablishing the address and port of the server instance and start
+the server instance. Notice that what <code>startServer</code> returns is not an instance
+of <code>RemoteDataflows</code> but an instance of <code>LocalHost</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Declaring a dataflow variable and setting a value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Publishing the dataflow variable</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And then it&#8217;s time to create the client:</p>
+</div>
+<div class="listingblock">
+<div class="title">Client</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>    void 'reading a simple dataflow variable'() {
+        setup: 'starting server exposing dataflow variable'
+            def serverDataflows = startServer() <i class="conum" data-value="1"></i><b>(1)</b>
+        when: 'listening to that server'
+            def clientDataflows = RemoteDataflows.create() <i class="conum" data-value="2"></i><b>(2)</b>
+            def remoteVariablePromise = <i class="conum" data-value="3"></i><b>(3)</b>
+                clientDataflows.getVariable(
+                    "localhost",
+                    9000,
+                    "meaning-of-life"
+                )
+        and: 'asking for a given dataflow variable'
+            def result = remoteVariablePromise.get() <i class="conum" data-value="4"></i><b>(4)</b>
+        then: 'you should get what you expected'
+            result.value == 42
+        cleanup: 'stopping server instance'
+            serverDataflows.stopServer() <i class="conum" data-value="5"></i><b>(5)</b>
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Now it&#8217;s time to build and run the server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create an instance of <code>RemoteDataflows</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Getting a pointer to the dataflow variable published at the
+server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Once we get the reference we can start asking for the variable&#8217;s value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Stopping the server</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_actors">8.2. Actors</h3>
+<div class="paragraph">
+<p>The way actors are published is very similar than the way dataflows were published. Instead
+of using the <code>RemoteDataflows</code> we will be using the <code>RemoteActors</code> instance.</p>
+</div>
+<div class="paragraph">
+<p><code>RemoteActors</code> have <code>2</code> responsabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>To create</code> a remote actor&#8217;s server: Actors' instances will be <code>published</code> to that server using
+an id (a simple string).</p>
+</li>
+<li>
+<p>To enable clients <code>to get a reference</code> of remote actors: That will be possible by
+setting address, port and the actor&#8217;s identifier at the server.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Imports</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>import static groovyx.gpars.actor.Actors.actor
+import groovyx.gpars.actor.remote.RemoteActors</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Full example</div>
+<div class="content">
+<pre class="prettyprint groovy language-groovy"><code>    void 'simple remote actors test'() {
+        given: 'a remote actor server'
+            <i class="conum" data-value="1"></i><b>(1)</b>
+            def remoteActorServer = RemoteActors.create()
+            remoteActorServer.startServer('localhost',9000)
+        and: 'a simple DefaultActor instance'
+            <i class="conum" data-value="2"></i><b>(2)</b>
+            def simpleActor = actor {
+                loop {
+                    react { String msg -&gt;
+                        reply "Thanks for saying: $msg"
+                    }
+                }
+            }
+        when: 'publishing the actor remotely'
+            <i class="conum" data-value="3"></i><b>(3)</b>
+            remoteActorServer.publish(simpleActor, 'greetingsActor')
+        and: 'getting the actor reference'
+            <i class="conum" data-value="4"></i><b>(4)</b>
+            def remoteActorsClient = RemoteActors.create()
+            def actorPromise =
+                remoteActorsClient
+                    .get('localhost', 9000, 'greetingsActor')
+            <i class="conum" data-value="5"></i><b>(5)</b>
+            def remoteActor = actorPromise.get()
+        and: 'sending a message to actor'
+            <i class="conum" data-value="6"></i><b>(6)</b>
+            def result = remoteActor.sendAndWait('hello')
+        then: 'the reply should be the expected'
+             result == 'Thanks for saying: hello'
+        cleanup: 'shutting down the actor server'
+            remoteActorServer.stopServer()
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Creating the <code>RemoteActors</code> instance. This instance will create the remote server
+where actors will be published.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This is a regular <code>groovyx.gpars.actor.DefaultActor</code> instance.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Publishing the actor&#8217;s instance to the server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Creating another <code>RemoteActors</code> instance to simulate client won&#8217;t be able to
+access the server <code>RemoteActors</code> instance. Once we get the <code>RemoteActors</code> instance
+we ask for the actor instance published with the id <code>greetingsActor</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The <code>RemoteActors</code> instance returned a promise containing the
+requested actor.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Then we can send messages (serialized) to the remote actor like if
+we had the actor working locally.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_exercises_solutions">Appendix A: Exercises solutions</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -2024,7 +2285,7 @@ has been processed.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-06-17 00:17:45 CEST
+Last updated 2014-09-21 11:49:00 CEST
 </div>
 </div>
 </body>
