@@ -1,0 +1,69 @@
+== Remoting
+
+Remoting has become part of GPars since version 1.3-SNAPSHOT. That's great news!!!! Until
+this moment all actors should run in the same JVM in order to be able to
+communicate each other. Now you can be running an actor in one machine sending
+messages to another in another machine.
+
+WARNING: Although in the confluence documentation says it should be
+available through the snapshot binaries the fact is that at the point
+I wrote this examples, I had to create my own binaries from sources
+because it wasn't included in the jar. I'm sure that in the 
+following weeks this warning won't make sense anymore.
+
+NOTE: You can find more information about remoting at GPars ascii documentation, and
+at this codehaus page http://docs.codehaus.org/display/GPARS/2014/09/06/Remoting+for+GPars[Confluence]
+
+=== Dataflow 
+
+Although this documentation is all about actors, I've added some extra
+examples about remoting because I think remoting is going to be one
+of the most important features of GPars in the near future.
+
+When working with remote dataflows the most 
+important classes to keep in mind are:
+
+[source, groovy]
+.imports
+----
+include::{testDir}/exercises/remoting/dataflow/DataflowRemotingSpec.groovy[tags=dataflowremoting_imports]
+----
+
+The following example just runs a server instance which publish a dataflow
+variable and a client asking for the value of the dataflow variable
+published at the server.
+
+First of all lets see how to build the server:
+
+[source, groovy]
+.Server
+----
+include::{testDir}/exercises/remoting/dataflow/DataflowRemotingSpec.groovy[tags=dataflowremoting_1]
+----
+
+<1> Create an instance of a +RemoteDataflows+
+<2> Stablishing the address and port of the server instance and start
+the server instance. Notice that what +startServer+ returns is not an instance
+of +RemoteDataflows+ but an instance of +LocalHost+. 
+<3> Declaring a dataflow variable and setting a value
+<4> Publishing the dataflow variable 
+
+And then it's time to create the client:
+
+[source, groovy]
+.Client
+----
+include::{testDir}/exercises/remoting/dataflow/DataflowRemotingSpec.groovy[tags=dataflowremoting_2]
+----
+
+<1> Now it's time to build and run the server 
+<2> Create an instance of +RemoteDataflows+
+<3> Getting a pointer to the dataflow variable published at the
+server
+<4> Once we get the reference we can start asking for the variable's value
+<5> Stopping the server 
+
+
+=== Actors 
+
+
