@@ -66,4 +66,37 @@ server
 
 === Actors 
 
+The way actors are published is very similar than the way dataflows were published. Instead
+of using the +RemoteDataflows+ we will be using the +RemoteActors+ instance. 
+
++RemoteActors+ have +2+ responsabilities:
+
+* +To create+ a remote actor's server: Actors' instances will be +published+ to that server using
+an id (a simple string).
+* To enable clients +to get a reference+ of remote actors: That will be possible by
+setting address, port and the actor's identifier at the server.
+
+[source, groovy]
+.Imports
+----
+include::{testDir}/exercises/remoting/actors/ActorsRemotingSpec.groovy[tags=remoteactors_imports]
+----
+
+[source, groovy]
+.Full example
+----
+include::{testDir}/exercises/remoting/actors/ActorsRemotingSpec.groovy[tags=remoteactors_1]
+----
+
+<1> Creating the +RemoteActors+ instance. This instance will create the remote server
+where actors will be published.
+<2> This is a regular +groovyx.gpars.actor.DefaultActor+ instance.
+<3> Publishing the actor's instance to the server
+<4> Creating another +RemoteActors+ instance to simulate client won't be able to 
+access the server +RemoteActors+ instance. Once we get the +RemoteActors+ instance
+we ask for the actor instance published with the id +greetingsActor+.
+<5> The +RemoteActors+ instance returned a promise containing the 
+requested actor.
+<6> Then we can send messages (serialized) to the remote actor like if
+we had the actor working locally.
 
